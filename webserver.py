@@ -162,9 +162,11 @@ def edit_tunnel_without_id_with_slash():
 @app.route("/")
 def idk():
     status = "state.tunnel.stopped"
+    setting= settings.get_settings()
+    socks = setting["socks"]
     if mon.is_active():
       status = "state.tunnel.running"
-    return {"status": status, "docs": "/docs/"}
+    return {"status": status, "docs": "/docs/", "socks": socks}
 
 
 

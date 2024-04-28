@@ -1,7 +1,7 @@
 import time
 import json
 import libsql_experimental as libsql
-import creds
+from . import creds
 
 conn = libsql.connect(database=creds.LIBSQL_URL,
                       auth_token=creds.LIBSQL_TOKEN)
