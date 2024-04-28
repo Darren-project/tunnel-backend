@@ -1,0 +1,9 @@
+#!/usr/bin/python3
+
+import cli_back, __init__
+
+def main():
+    cli_back.app(prog_name=__init__.__app_name__)
+
+if __name__ == "__main__":
+    main()

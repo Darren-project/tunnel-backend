@@ -1,0 +1,2 @@
+LIBSQL_URL = ""
+LIBSQL_TOKEN = ""
