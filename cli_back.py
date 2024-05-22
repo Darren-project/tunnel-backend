@@ -185,7 +185,7 @@ def daemon() -> None:
 
    for i in settings.tunnels:
      logger.info("Staring tunnel for " + i["name"] + " from " + i['host'] + " to " + i['target'])
-     os.system('nohup /usr/local/bin/go run proxy.go -local "' + i['host'] + '" -target "' + i['target'] + '"  &')
+     os.system('nohup $(which go) run proxy.go -local "' + i['host'] + '" -target "' + i['target'] + '"  &')
 #     os.system('echo $! > /tmp/socksman/' + str(file) + '.txt')
  #    pidfiles.append('/tmp/socksman/' + str(file) + '.txt')
   #   file = file + 1
