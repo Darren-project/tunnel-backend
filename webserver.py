@@ -2,9 +2,9 @@ import jwt
 from jwt import PyJWKClient
 import time 
 
-from . import systemd
+import systemd
 from flask import Flask, request, send_from_directory, Blueprint, Response, request
-from . import settings
+import settings
 import os
 from flask_cors import CORS
 mon = systemd.ServiceMonitor("socksproxyman")
@@ -178,3 +178,4 @@ def serve_docs_main():
 def serve_docs(path):
     return send_from_directory('docs', path)
 
+app.run(port=8989)
