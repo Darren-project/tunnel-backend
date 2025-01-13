@@ -51,7 +51,7 @@ def before_request():
   # (authentication, validation, etc.)
   if not request.headers.get('Authorization'):
     # Handle requests without Authorization header (e.g., log or reject)
-    return {"status": "state.auth.fail"}, 401
+    return {"status": "state.auth.fail"}, 403
   else:
     try:
       auth_result = False
@@ -124,7 +124,7 @@ def create_tunnel(id):
     else:
       for i in settings.tunnels:
          if i["name"] == id:
-           return {"status": "state.tunnel.create.invalid.duplicate"}, 401
+           return {"status": "state.tunnel.create.invalid.duplicate"}, 400
       settings.add_tunnels(id, data["host"], data["target"])
       return {"status": "state.tunnel.create.success"}
 
@@ -150,7 +150,7 @@ def edit_tunnel(id):
            i["edited"] = True
            settings.save()
            return {"status": "state.tunnel.edit.success"}
-    return {"status": "state.tunnel.edit.invalid.notfound"}, 401
+    return {"status": "state.tunnel.edit.invalid.notfound"}, 400
 
 @app.route("/api/tunnels/edit", methods=['POST'])
 def edit_tunnel_without_id():
