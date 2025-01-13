@@ -25,6 +25,7 @@ def refresh_tunnels():
    for i in notcorrect:
       tunnels.append({"name":i[0],"host":i[1],"target":i[2]})
       conn.execute("END TRANSACTION;")
+
 def add_tunnels(name,host,target):
    tunnels.append({"name":name,"host":host,"target":target, "edited": True})
    save()
@@ -45,8 +46,12 @@ def save():
         conn.execute("INSERT INTO mapping (name, host, target) VALUES ('" + i["editname"] + "','" + i["host"] + "','" + i["target"] + "');")
         
      i1 = i1 + 1
-   conn.commit()
+   try:
+     conn.commit()
+   except:
+     pass
    conn.execute("END TRANSACTION;")
+   refresh_tunnels()
    
 
 def delete_tunnels(name):

@@ -3,75 +3,89 @@ package main
 import (
 	"flag"
 	"io"
+	"log"
 	"net"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/proxy"
 )
 
-func pipe(src io.Reader, dst io.Writer) {
+// pipe copies data from src to dst and logs any errors encountered.
+func pipe(src io.Reader, dst io.Writer, direction string) {
 	_, err := io.Copy(dst, src)
 	if err != nil {
-		log.WithError(err).Warn("error copying data")
+		log.Printf("error in %s data transfer: %v", direction, err)
 	}
 }
 
+// handleConnection manages the lifecycle of a single connection,
+// forwarding data through the SOCKS5 proxy to the target server.
 func handleConnection(conn net.Conn, socks5, target string) {
 	defer conn.Close()
 
-	// Establish a SOCKS5 proxy connection
+	// Create a SOCKS5 proxy dialer
 	dialer, err := proxy.SOCKS5("tcp", socks5, nil, &net.Dialer{
 		Timeout:   60 * time.Second,
 		KeepAlive: 30 * time.Second,
 	})
 	if err != nil {
-		log.WithError(err).Warn("cannot initialize SOCKS5 proxy")
+		log.Printf("cannot initialize SOCKS5 proxy: %v", err)
 		return
 	}
 
-	// Dial the target server
-	c, err := dialer.Dial("tcp", target)
+	// Dial the target server through the SOCKS5 proxy
+	proxyConn, err := dialer.Dial("tcp", target)
 	if err != nil {
-		log.WithError(err).WithField("target", target).Warn("cannot dial target server")
+		log.Printf("cannot dial target server %s: %v", target, err)
 		return
 	}
-	defer c.Close()
+	defer proxyConn.Close()
 
-	// Set up data pipes
-	up, down := make(chan struct{}), make(chan struct{})
+	log.Printf("Forwarding connection to target %s via proxy %s", target, socks5)
+
+	// Set up bidirectional data transfer
+	errCh := make(chan error, 2)
 	go func() {
-		pipe(conn, c)
-		close(up)
+		pipe(conn, proxyConn, "upstream")
+		errCh <- nil
 	}()
 	go func() {
-		pipe(c, conn)
-		close(down)
+		pipe(proxyConn, conn, "downstream")
+		errCh <- nil
 	}()
 
-	// Wait for data transfer to complete
-	<-up
-	<-down
+	// Wait for either direction to complete
+	select {
+	case <-errCh:
+		log.Printf("Connection to %s closed", target)
+	}
 }
 
 func main() {
-	local := flag.String("local", "127.0.0.1:9001", "address to listen")
-	socks5 := flag.String("proxy", "127.0.0.1:1055", "SOCKS5 proxy")
-	target := flag.String("target", "100.112.221.133:9001", "forwarding target")
+	// Define and parse command-line flags
+	local := flag.String("local", "127.0.0.1:9001", "address to listen on")
+	socks5 := flag.String("proxy", "127.0.0.1:1055", "SOCKS5 proxy address")
+	target := flag.String("target", "100.112.221.133:9001", "forwarding target address")
 	flag.Parse()
 
-	lis, err := net.Listen("tcp", *local)
+	// Start listening for incoming connections
+	listener, err := net.Listen("tcp", *local)
 	if err != nil {
-		log.WithError(err).Fatal("cannot listen")
+		log.Fatalf("Failed to start listener on %s: %v", *local, err)
 	}
+	defer listener.Close()
 
+	log.Printf("Listening on %s and forwarding to %s via proxy %s", *local, *target, *socks5)
+
+	// Accept incoming connections in a loop
 	for {
-		conn, err := lis.Accept()
+		conn, err := listener.Accept()
 		if err != nil {
-			log.WithError(err).Warn("cannot accept connection")
+			log.Printf("Failed to accept connection: %v", err)
 			continue
 		}
+
+		log.Printf("Accepted connection from %s", conn.RemoteAddr())
 		go handleConnection(conn, *socks5, *target)
 	}
 }
-

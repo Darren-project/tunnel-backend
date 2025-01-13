@@ -70,6 +70,7 @@ def before_request():
     # Process requests with Authorization header
     # (e.g., extract token, validate credentials)
     if auth_result:
+       time.sleep(2)
        pass
 
     else:
