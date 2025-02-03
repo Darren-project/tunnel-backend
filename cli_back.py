@@ -182,10 +182,17 @@ def daemon() -> None:
    file = 0
 
    pidfiles = []
-
+   setting= settings.get_settings()
+   socks = setting["socks"]
+   if ":" in socks:
+     socki, sockp = socks.split(":")
+   else:
+     socki = socks
+     sockp = "1055"
    for i in settings.tunnels:
-     logger.info("Staring tunnel for " + i["name"] + " from " + i['host'] + " to " + i['target'])
-     os.system('nohup $(which go) run proxy.go -local "' + i['host'] + '" -target "' + i['target'] + '"  &')
+     logger.info("Staring tunnel for " + i["name"] + " from " + i['host'] + " to " + i['target'] + " via " + socki + ":" + sockp)
+     local, port = i['host'].split(":")
+     os.system("./socat TCP-LISTEN:" + port + ",fork,reuseaddr,reuseport,so-linger=0,nodelay,bind=" + local + " SOCKS5:" + socki + ":" + i['target'] + ",socks5port=" + sockp + " &")
 #     os.system('echo $! > /tmp/socksman/' + str(file) + '.txt')
  #    pidfiles.append('/tmp/socksman/' + str(file) + '.txt')
   #   file = file + 1
