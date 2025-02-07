@@ -51,7 +51,7 @@ def before_request():
   # (authentication, validation, etc.)
   if not request.headers.get('Authorization'):
     # Handle requests without Authorization header (e.g., log or reject)
-    return {"status": "state.auth.fail"}, 403
+    return {"status": "state.auth.fail"}, 401
   else:
     try:
       auth_result = False
@@ -74,7 +74,7 @@ def before_request():
        pass
 
     else:
-        return {"status": "state.auth.fail"}, 403
+        return {"status": "state.auth.fail"}, 401
  
 # Register the blueprint in your main app
 app.register_blueprint(api_blueprint)

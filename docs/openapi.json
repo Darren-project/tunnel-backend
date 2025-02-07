@@ -114,7 +114,7 @@
               }
             }
           },
-          "403": {
+          "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           }
         }
@@ -141,7 +141,7 @@
               }
             }
           },
-          "403": {
+          "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           }
         }
@@ -168,7 +168,7 @@
               }
             }
           },
-          "403": {
+          "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           }
         }
@@ -195,7 +195,7 @@
               }
             }
           },
-          "403": {
+          "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           }
         }
@@ -249,7 +249,7 @@
               }
             }
           },
-          "403": {
+          "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           }
         }
@@ -333,7 +333,7 @@
               }
             }
           },
-          "403": {
+          "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           }
         }
@@ -427,7 +427,7 @@
               }
             }
           },
-          "403": {
+          "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           }
         }
